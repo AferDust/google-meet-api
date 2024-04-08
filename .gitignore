@@ -1,4 +1,7 @@
 # Byte-compiled / optimized Python files
+/carbon-zone-417117-e22bb594e631.json
+/credentials.json
+
 *.pyc
 __pycache__/
 
