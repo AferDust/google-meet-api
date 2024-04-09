@@ -5,11 +5,13 @@ from api.views import (
     # GoogleLogInAPIView,
     # CallBackAPIView,
     # GoogleCalendarAPIView
-    TestAPIView
+    TestAPIView, MyProtectedView
 )
 
 urlpatterns = [
     path('google/calendar', TestAPIView.as_view()),
-    path('auth/', include('api.auth.urls'))
+    path('auth/', include('api.auth.urls')),
+
+    path('test/googe-acces-token/', MyProtectedView.as_view())
 ]
 

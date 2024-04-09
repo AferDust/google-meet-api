@@ -3,6 +3,8 @@ from google_auth_oauthlib.flow import Flow
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from api.permissions import IsGoogleAuthenticated
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -119,3 +121,13 @@ class TestAPIView(APIView):
 
     def get(self, request):
         return Response(data="Hello i passed test", status=status.HTTP_200_OK)
+
+
+class MyProtectedView(APIView):
+    permission_classes = [IsGoogleAuthenticated]
+
+    def get(self, request, format=None):
+        # Your view logic here
+        return Response({"message": "You have access!",
+                         "profile": request.user_info
+                         })

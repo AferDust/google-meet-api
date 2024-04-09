@@ -57,4 +57,4 @@ class GoogleOAuth2CallbackAPIView(APIView):
             'scopes': credentials.scopes
         }
 
-        return Response({'message': 'Credentials stored successfully.'})
+        return Response({'access_token': credentials.token})
