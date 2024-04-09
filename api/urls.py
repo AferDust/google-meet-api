@@ -12,3 +12,4 @@ urlpatterns = [
     path('google/calendar', TestAPIView.as_view()),
     path('auth/', include('api.auth.urls'))
 ]
+
