@@ -35,81 +35,87 @@ from googleapiclient.discovery import build
 #         return Response({'events': event_list})
 
 
-class GoogleLogInAPIView(APIView):
+# class GoogleLogInAPIView(APIView):
+#
+#     def get(self, request):
+#         client_config = {
+#             "web": {
+#                 "client_id": "722494925006-7s80gcjt08kpfcdkcc4515ppe8m8gt6u.apps.googleusercontent.com",
+#                 "project_id": "carbon-zone-417117",
+#                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+#                 "token_uri": "https://oauth2.googleapis.com/token",
+#                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+#                 "client_secret": "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",
+#                 "redirect_uris": [
+#                     "https://oauth.pstmn.io/v1/callback"
+#                 ]
+#             }
+#         }
+#
+#         flow = Flow.from_client_config(client_config, scopes=['https://www.googleapis.com/auth/calendar'])
+#         flow.redirect_uri = 'http://127.0.0.1:8000/api/google/callback'
+#
+#         authorization_url, state = flow.authorization_url(
+#             access_type='offline',
+#             include_granted_scopes='true')
+#
+#         return redirect(authorization_url)
+#
+#
+# class CallBackAPIView(APIView):
+#
+#     def post(self, request):
+#         state = request.GET.get('state', '')
+#         code = request.GET.get('code', '')
+#
+#         flow = Flow.from_client_secrets_file('credentials.json',
+#                                              scopes=['https://www.googleapis.com/auth/calendar'],
+#                                              state=state)
+#         flow.redirect_uri = 'http://127.0.0.1:8000/api/google/calendar'
+#
+#         flow.fetch_token(code=code)
+#
+#         credentials = flow.credentials
+#         request.session['credentials'] = {
+#             'token': credentials.token,
+#             'refresh_token': credentials.refresh_token,
+#             'token_uri': credentials.token_uri,
+#             'client_id': credentials.client_id,
+#             'client_secret': credentials.client_secret,
+#             'scopes': credentials.scopes
+#         }
+#
+#         return Response("Google Calendar access granted.", status=status.HTTP_200_OK)
+#
+#
+# class GoogleCalendarAPIView(APIView):
+#
+#     def get(self, request):
+#         creds_data = request.session.get('credentials')
+#         credentials = Credentials(**creds_data)
+#
+#         service = build('calendar', 'v3', credentials=credentials)
+#
+#         event = {
+#             'summary': 'Appointment',
+#             'location': '800 Howard St., San Francisco, CA 94103',
+#             'description': 'A chance to hear more about Google\'s developer products.',
+#             'start': {
+#                 'dateTime': '2024-05-28T09:00:00-07:00',
+#                 'timeZone': 'America/Los_Angeles',
+#             },
+#             'end': {
+#                 'dateTime': '2024-05-28T17:00:00-07:00',
+#                 'timeZone': 'America/Los_Angeles',
+#             },
+#         }
+#
+#         event_result = service.events().insert(calendarId='primary', body=event).execute()
+#
+#         return Response(f"Event created: {event_result.get('htmlLink')}", status=status.HTTP_200_OK)
+
+
+class TestAPIView(APIView):
 
     def get(self, request):
-        client_config = {
-            "web": {
-                "client_id": "722494925006-7s80gcjt08kpfcdkcc4515ppe8m8gt6u.apps.googleusercontent.com",
-                "project_id": "carbon-zone-417117",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_secret": "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",
-                "redirect_uris": [
-                    "https://oauth.pstmn.io/v1/callback"
-                ]
-            }
-        }
-
-        flow = Flow.from_client_config(client_config, scopes=['https://www.googleapis.com/auth/calendar'])
-        flow.redirect_uri = 'http://127.0.0.1:8000/api/google/callback'
-
-        authorization_url, state = flow.authorization_url(
-            access_type='offline',
-            include_granted_scopes='true')
-
-        return redirect(authorization_url)
-
-
-class CallBackAPIView(APIView):
-
-    def post(self, request):
-        state = request.GET.get('state', '')
-        code = request.GET.get('code', '')
-
-        flow = Flow.from_client_secrets_file('credentials.json',
-                                             scopes=['https://www.googleapis.com/auth/calendar'],
-                                             state=state)
-        flow.redirect_uri = 'http://127.0.0.1:8000/api/google/calendar'
-
-        flow.fetch_token(code=code)
-
-        credentials = flow.credentials
-        request.session['credentials'] = {
-            'token': credentials.token,
-            'refresh_token': credentials.refresh_token,
-            'token_uri': credentials.token_uri,
-            'client_id': credentials.client_id,
-            'client_secret': credentials.client_secret,
-            'scopes': credentials.scopes
-        }
-
-        return Response("Google Calendar access granted.", status=status.HTTP_200_OK)
-
-
-class GoogleCalendarAPIView(APIView):
-
-    def get(self, request):
-        creds_data = request.session.get('credentials')
-        credentials = Credentials(**creds_data)
-
-        service = build('calendar', 'v3', credentials=credentials)
-
-        event = {
-            'summary': 'Appointment',
-            'location': '800 Howard St., San Francisco, CA 94103',
-            'description': 'A chance to hear more about Google\'s developer products.',
-            'start': {
-                'dateTime': '2024-05-28T09:00:00-07:00',
-                'timeZone': 'America/Los_Angeles',
-            },
-            'end': {
-                'dateTime': '2024-05-28T17:00:00-07:00',
-                'timeZone': 'America/Los_Angeles',
-            },
-        }
-
-        event_result = service.events().insert(calendarId='primary', body=event).execute()
-
-        return Response(f"Event created: {event_result.get('htmlLink')}", status=status.HTTP_200_OK)
+        return Response(data="Hello i passed test", status=status.HTTP_200_OK)
