@@ -79,8 +79,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-AUTHENTICATION_BACKENDS = [
-]
+# AUTHENTICATION_BACKENDS = [
+# ]
 
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
