@@ -1,8 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 
 from api.models import Bank
-from api.modules.bank.serializers import (
+from .serializers import (
     BankSerializer,
+    BankListSerializer,
     BankCoverSerializer
 )
 
@@ -13,6 +14,8 @@ class BankModelViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'list':
+            return BankListSerializer
+        elif self.action == 'retrieve':
             return BankCoverSerializer
 
         return super().get_serializer_class()

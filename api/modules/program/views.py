@@ -2,7 +2,6 @@ from rest_framework import generics, views
 from rest_framework.response import Response
 
 from api.models import Program
-from api.modules.meet import serializers
 from api.modules.program.serializers import ProgramSerializer
 from api.modules.services.gpt import get_structured_program_from_gpt_api
 
