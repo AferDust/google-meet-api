@@ -2,6 +2,12 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    address = models.CharField(default=None, null=True, blank=True)
+    phone_number = models.CharField(default=None, null=True, blank=True)
+
+
 class Program(models.Model):
     name = models.CharField()
     description = models.TextField()

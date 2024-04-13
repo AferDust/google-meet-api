@@ -1,9 +1,12 @@
+from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from google_auth_oauthlib.flow import Flow
 
 from django.shortcuts import redirect
 
+from api.auth.serializers import UserSerializer
 from config import settings
 
 
@@ -58,3 +61,8 @@ class GoogleOAuth2CallbackAPIView(APIView):
         }
 
         return Response({'access_token': credentials.token})
+
+
+class RegistrationCreateAPIView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
