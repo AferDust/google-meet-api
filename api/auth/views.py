@@ -4,6 +4,7 @@ from google_auth_oauthlib.flow import Flow
 
 from django.shortcuts import redirect
 
+from api.permissions import IsGoogleAuthenticated
 from config import settings
 
 
@@ -58,3 +59,12 @@ class GoogleOAuth2CallbackAPIView(APIView):
         }
 
         return Response({'access_token': credentials.token})
+
+
+class GetUserGoogleTokemAPIView(APIView):
+    permission_classes = [IsGoogleAuthenticated]
+
+    def get(self, request):
+        return Response({"message": "You have access!",
+                         "profile": request.user_info
+                         })
