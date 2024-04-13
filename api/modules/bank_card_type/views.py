@@ -32,24 +32,23 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
 
     def get_queryset(self):
         filter_params = {
-            'categories': self.request.query_params.getlist("category", None),
-            'is_qr_methods': self.request.query_params.get("is_qr_method", None),
-            'is_pos_methods': self.request.query_params.get("is_pos_method", None),
-            'min_percent': self.request.query_params.get("min_percent", None),
-            'max_percent': self.request.query_params.getlist('max_percent', None),
+            'categories': self.request.query_params.getlist("category"),
+            'has_qr_payment': self.request.query_params.get("has_qr_payment", 'false').lower() == 'true',
+            'has_card_payment': self.request.query_params.get("has_card_payment", 'false').lower() == 'true',
+            'min_percent': self.request.query_params.get("min_percent"),
+            'max_percent': self.request.query_params.get("max_percent"),
         }
 
         queryset = Cashback.objects.all()
-        print(queryset)
         filters = Q()
 
         if filter_params['categories']:
             filters &= Q(category__id__in=filter_params['categories'])
 
-        if filter_params['is_qr_method']:
-            filters &= Q(is_qr_method=True)
-        if filter_params['is_pos_method']:
-            filters &= Q(is_pos_method=True)
+        if filter_params['has_qr_payment']:
+            filters &= Q(has_qr_payment=True)
+        if filter_params['has_card_payment']:
+            filters &= Q(has_card_payment=True)
 
         if filter_params['min_percent']:
             min_percent = float(filter_params['min_percent'])
