@@ -38,7 +38,7 @@ class Bank(models.Model):
 
 class BankCardType(models.Model):
     name = models.CharField(max_length=255)
-    url = models.URLField(max_length=200)
+    url = models.URLField(max_length=1024)
     bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
 
     def __str__(self):

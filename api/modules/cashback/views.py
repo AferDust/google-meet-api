@@ -19,7 +19,6 @@ class CashbackCreateAPIView(views.APIView):
         cashbacks_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
         print(cashbacks_data)
         cashback_objs = self.create_cashbacks_and_categories(cashbacks_data, bank_card_type_id)
-        # print(cashback_objs[0].percent)
         return Response(data=CashBackSerializer(cashback_objs, many=True).data)
 
     def create_cashbacks_and_categories(self, cashbacks_data, bank_card_type_id):

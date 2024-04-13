@@ -6,5 +6,4 @@ from .views import CashbackCreateAPIView
 
 urlpatterns = [
     path('create/', CashbackCreateAPIView.as_view()),
-
 ]
