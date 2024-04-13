@@ -70,7 +70,7 @@ class Cashback(models.Model):
 
 class Card(models.Model):
     number = models.CharField(max_length=19)
-    expired_date = models.DateField()
+    expired_date = models.CharField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE)
 
