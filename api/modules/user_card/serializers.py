@@ -12,11 +12,16 @@ class UserCoverSerializer(serializers.ModelSerializer):
 
 class CardSerializer(serializers.ModelSerializer):
     user = UserCoverSerializer(read_only=True)
+    card_type_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Card
-        fields = ('id', 'number', 'expired_date', 'card_type', "user")  # 'user' is deliberately excluded
+        fields = (
+        'id', 'number', 'expired_date', 'card_type', "card_type_name", "user")  # 'user' is deliberately excluded
         read_only_fields = ('id',)
+
+    def get_card_type_name(self, obj):
+        return obj.card_type.name
 
     def create(self, validated_data):
         # Automatically assign the logged-in user as the owner of the card
