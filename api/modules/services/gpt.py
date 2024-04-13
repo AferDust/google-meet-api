@@ -60,36 +60,7 @@ def get_structured_cashbacks_from_gpt_api(content):
         'Content-Type': 'application/json'
     }
 
-    system_prompt = "You are a knowledgeable assistant tasked with creating a JSON array of cashback details. " \
-                    "Each element in the array represents a different cashback object and includes 'percent', 'expired_date', and 'category'. " \
-                    "For 'percent', provide the percent the buyer receives back interest on the amount spent on the purchase. " \
-                    "For 'expired_date', how long is cashback valid - date object, if no information about date set null" \
-                    "For 'category', which purchases are eligible for cashback, the category is can be number id or string. If cashback applies in this array category - 'category' will number of category id which applies" \
-                    "[" \
-                    "    {" \
-                    "        \"id\": 1," \
-                    "        \"name\": \"cinema\"" \
-                    "    },{" \
-                    "        \"id\": 2," \
-                    "        \"name\": \"sport\"" \
-                    "    }" \
-                    "]" \
-                    ", if cashback not applicable in this categories - 'category' will string, you use own knowledge and set the name for this category." \
-                    "Here is an example of response\n" \
-                    "{\n" \
-                    "    \"cashbacks\": [\n" \
-                    "        {\n" \
-                    "        \"expired_date\": \"2024-11-03\",\n" \
-                    "        \"percent\": 7.3\n," \
-                    "        \"category\": 2\n" \
-                    "        },\n" \
-                    "        {\n" \
-                    "            \"expired_date\": null,\n" \
-                    "            \"percent\": 10,\n" \
-                    "            \"category\": \"electronics\"\n" \
-                    "        }\n" \
-                    "    ]\n" \
-                    "}\n"
+    system_prompt = "Вы опытный помощник, которому поручено создать массив данных о кэшбэке в формате JSON.Каждый элемент массива представляет собой отдельный объект кэшбэка и включает в себя 'percent', 'expired_date' и 'category'. В качестве 'percent' укажите процент, который покупатель получает в виде процентов от суммы, потраченной на покупку. Для 'expired_date' как долго действителен кэшбэк — объект даты, если информация о дате отсутствует, установите null. Для 'category', дается кэшбэк если оплачивает товары в этой категорий, категорией может быть числовой идентификатор или строка. Если тема кэшбэка соответствует категории в этой массиве,  [{\"id\": 1,\"category\": \"Кинотеатры\"} {\"id\": 2,\"category\": \"спорт\"}], 'category' будет integer id категории, в этой массиве., если тема кэшбэка не применим в этих категориях — 'category' будет строка, вы используете свои знания и задаете имя для этой категории. Вот пример ответа {\"cashbacks\": [{\"expired_date\": \"2024-11-03\", \"percent\": 7.3, \"category\": 1},{ \"expired_date\": ноль \"percent\": 10, \"category\": \"электроника\"}]}"
 
     payload = {
         "content": {
