@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 # Application definition
@@ -152,4 +153,10 @@ GOOGLE_OAUTH2_CLIENT_CONFIG = {
             "http://127.0.0.1:8000"
         ]
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }

@@ -3,6 +3,7 @@ from django.urls import include
 
 from api.views import TestAPIView
 
+
 urlpatterns = [
     path('google/test', TestAPIView.as_view()),
 
@@ -11,5 +12,3 @@ urlpatterns = [
     path('bank/', include('api.modules.bank.urls')),
     path('bank-card-type/', include('api.modules.bank_card_type.urls'))
 ]
-
-
