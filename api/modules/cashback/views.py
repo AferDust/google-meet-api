@@ -27,13 +27,9 @@ class CashbackCreateAPIView(views.APIView):
 
             # Process cashback data
             cashback_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
-            if not cashback_data:
-                return Response({"error": "Failed to process cashbacks."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Create cashback and category objects
             cashback_objs = self.create_cashbacks_and_categories(cashback_data, bank_card_type_id)
-            if not cashback_objs:
-                return Response({"error": "Failed to create cashback entries."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Serialize and return the newly created cashback objects
             return Response(data=CashBackSerializer(cashback_objs, many=True).data)
