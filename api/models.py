@@ -57,8 +57,8 @@ class Cashback(models.Model):
     expired_date = models.DateField(null=True, blank=True)
     percent = models.FloatField()
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
-    is_qr_method = models.BooleanField(default=False)
-    is_pos_method = models.BooleanField(default=False)
+    has_qr_payment = models.BooleanField(default=False)
+    has_card_payment = models.BooleanField(default=False)
 
     def is_expired(self):
         return self.expired_date < timezone.now().date()
