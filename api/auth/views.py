@@ -6,11 +6,8 @@ from google_auth_oauthlib.flow import Flow
 
 from django.shortcuts import redirect
 
-<<<<<<< HEAD
 from api.permissions import IsGoogleAuthenticated
-=======
 from api.auth.serializers import UserSerializer
->>>>>>> 092cb679f201223047b777507b110e1aef3728dd
 from config import settings
 
 
@@ -67,7 +64,6 @@ class GoogleOAuth2CallbackAPIView(APIView):
         return Response({'access_token': credentials.token})
 
 
-<<<<<<< HEAD
 class GetUserGoogleTokemAPIView(APIView):
     permission_classes = [IsGoogleAuthenticated]
 
@@ -75,8 +71,7 @@ class GetUserGoogleTokemAPIView(APIView):
         return Response({"message": "You have access!",
                          "profile": request.user_info
                          })
-=======
+
 class RegistrationCreateAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
->>>>>>> 092cb679f201223047b777507b110e1aef3728dd

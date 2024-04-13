@@ -46,13 +46,14 @@ class BankCardType(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.name
+        return self.category
 
 
-class CashBack(models.Model):
+class Cashback(models.Model):
+    bank_card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE)
     expired_date = models.DateField(null=True, blank=True)
     percent = models.FloatField()
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
@@ -75,4 +76,3 @@ class Card(models.Model):
 
     def __str__(self):
         return f"{self.number} - Expires on {self.expired_date}"
-
