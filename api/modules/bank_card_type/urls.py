@@ -7,5 +7,5 @@ bank_card_type_router = routers.SimpleRouter()
 bank_card_type_router.register(r'', BankCardTypeModelViewSet)
 
 urlpatterns = [
-    path('', include(bank_card_type_router.urls))
+    path('', include(bank_card_type_router.urls)),
 ]

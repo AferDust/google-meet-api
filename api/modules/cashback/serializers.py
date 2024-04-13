@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from api.models import CashBack
+from api.models import Cashback
 
 
 class CashBackSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CashBack
+        model = Cashback
         fields = "__all__"

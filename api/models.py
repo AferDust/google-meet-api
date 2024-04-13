@@ -52,17 +52,20 @@ class Category(models.Model):
         return self.category
 
 
-class CashBack(models.Model):
+class Cashback(models.Model):
+    bank_card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE)
     expired_date = models.DateField(null=True, blank=True)
     percent = models.FloatField()
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
-    card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE)
 
     def is_expired(self):
         return self.expired_date < timezone.now().date()
 
     def __str__(self):
         return f"{self.percent}% until {self.expired_date}"
+
+    class Meta:
+        unique_together = [['bank_card_type', 'category']]
 
 
 class Card(models.Model):
@@ -76,4 +79,3 @@ class Card(models.Model):
 
     def __str__(self):
         return f"{self.number} - Expires on {self.expired_date}"
-
