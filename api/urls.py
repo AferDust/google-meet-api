@@ -12,4 +12,5 @@ urlpatterns = [
     path('bank/', include('api.modules.bank.urls')),
     path('bank-card-type/', include('api.modules.bank_card_type.urls')),
     path('category/', include('api.modules.category.urls')),
+    path('cashback/', include('api.modules.cashback.urls')),
 ]

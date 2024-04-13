@@ -64,6 +64,9 @@ class Cashback(models.Model):
     def __str__(self):
         return f"{self.percent}% until {self.expired_date}"
 
+    class Meta:
+        unique_together = [['bank_card_type', 'category']]
+
 
 class Card(models.Model):
     number = models.CharField(max_length=19)
