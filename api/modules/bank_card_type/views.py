@@ -1,14 +1,16 @@
+from django.db.models import Q
 from rest_framework import viewsets, views
-from rest_framework.response import Response
 
-from api.models import BankCardType, Category, Cashback
+from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.filters import SearchFilter, OrderingFilter
+
+from api.models import BankCardType, Cashback
 from .serializers import (
     BankCardTypeParsingListSerializer,
-    BankCardTypeSerializer
+    BankCardTypeSerializer,
+    BankCardTypeWithCashbackListSerializer,
+    BankCardTypeWithCashbackCoverSerializer
 )
-from ..cashback.serializers import CashBackSerializer
-from ..category.serializers import CategorySerializer
-from ..services.gpt import get_structured_cashbacks_from_gpt_api
 
 
 class BankCardTypeModelViewSet(viewsets.ModelViewSet):
@@ -21,3 +23,45 @@ class BankCardTypeModelViewSet(viewsets.ModelViewSet):
 
         return super().get_serializer_class()
 
+
+class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
+    serializer_class = BankCardTypeWithCashbackListSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    ordering_fields = ['percent']
+    search_fields = ['bank_card_type__name', 'bank_card_type__bank__name']
+
+    def get_queryset(self):
+        filter_params = {
+            'categories': self.request.query_params.getlist("category", None),
+            'is_qr_methods': self.request.query_params.get("is_qr_method", None),
+            'is_pos_methods': self.request.query_params.get("is_pos_method", None),
+            'min_percent': self.request.query_params.get("min_percent", None),
+            'max_percent': self.request.query_params.getlist('max_percent', None),
+        }
+
+        queryset = Cashback.objects.all()
+        print(queryset)
+        filters = Q()
+
+        if filter_params['categories']:
+            filters &= Q(category__id__in=filter_params['categories'])
+
+        if filter_params['is_qr_method']:
+            filters &= Q(is_qr_method=True)
+        if filter_params['is_pos_method']:
+            filters &= Q(is_pos_method=True)
+
+        if filter_params['min_percent']:
+            min_percent = float(filter_params['min_percent'])
+            filters &= Q(percent__gte=min_percent)
+        if filter_params['max_percent']:
+            max_percent = float(filter_params['max_percent'])
+            filters &= Q(percent__lte=max_percent)  #
+
+        return queryset.filter(filters)
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return BankCardTypeWithCashbackCoverSerializer
+
+        return super().get_serializer_class()
