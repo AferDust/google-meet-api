@@ -23,8 +23,6 @@ class CashbackCreateAPIView(views.APIView):
 
             # Get all categories and serialize them
             categories = Category.objects.all()
-            if not categories:
-                return Response({"error": "No categories found."}, status=status.HTTP_404_NOT_FOUND)
             category_serializer = CategorySerializer(categories, many=True)
 
             # Process cashback data
