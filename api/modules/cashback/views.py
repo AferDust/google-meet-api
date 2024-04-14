@@ -80,8 +80,9 @@ class CategoryCashbackAPIView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, category_id=None):
-        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)).select_related('bank_card_type',
-                                                                                               'bank_card_type__bank')
+        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
+            .select_related('bank_card_type', 'bank_card_type__bank') \
+            .order_by('-percent')
         user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
 
         user_cashbacks = []
