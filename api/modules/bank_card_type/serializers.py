@@ -1,7 +1,5 @@
 from rest_framework import serializers
-
-from api.models import BankCardType, Cashback
-from api.modules.cashback.serializers import CashBackSerializer
+from api.models import BankCardType
 
 
 class BankCardTypeSerializer(serializers.ModelSerializer):
