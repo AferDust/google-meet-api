@@ -91,12 +91,11 @@ class CategoryCashbackAPIView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, category_id=None):
-        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
+        cashbacks = Cashback.objects.filter(category_id__in=(28, category_id)) \
             .select_related('bank_card_type', 'bank_card_type__bank') \
             .order_by('-percent')
-        user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
-
-        print(user_card_type_ids)
+        user_card_type_ids = Card.objects.filter(user=request.user)\
+            .values_list('card_type_id', flat=True).distinct()
 
         user_cashbacks = []
         other_cashbacks = []
@@ -148,7 +147,7 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
             filters &= Q(has_card_payment=has_card_payment)
 
         if filter_params['categories']:
-            filters |= Q(category__id__in=filter_params['categories']) | Q(category__id=177)
+            filters |= Q(category__id__in=filter_params['categories']) | Q(category__id=28)
 
         if filter_params['min_percent']:
             filters &= Q(percent__gte=float(filter_params['min_percent']))
