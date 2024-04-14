@@ -1,6 +1,6 @@
 from django.db.models import Q
 
-from rest_framework import views
+from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -16,16 +16,32 @@ from api.modules.services.gpt import get_structured_cashbacks_from_gpt_api
 class CashbackCreateAPIView(views.APIView):
 
     def post(self, request):
-        content = request.data.get("content")
-        bank_card_type_id = request.data.get("bank_card_type_id")
+        try:
+            # Retrieve data from request
+            content = request.data.get("content")
+            bank_card_type_id = request.data.get("bank_card_type_id")
 
-        categories = Category.objects.all()
-        category_serializer = CategorySerializer(categories, many=True)
+            # Validate necessary inputs
+            if not content or not bank_card_type_id:
+                return Response({"error": "Missing required 'content' or 'bank_card_type_id'."}, status=status.HTTP_400_BAD_REQUEST)
 
-        cashback_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
-        cashback_objs = self.create_cashbacks_and_categories(cashback_data, bank_card_type_id)
+            # Get all categories and serialize them
+            categories = Category.objects.all()
+            category_serializer = CategorySerializer(categories, many=True)
 
-        return Response(data=CashBackSerializer(cashback_objs, many=True).data)
+            # Process cashback data
+            cashback_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
+
+            # Create cashback and category objects
+            cashback_objs = self.create_cashbacks_and_categories(cashback_data, bank_card_type_id)
+
+            # Serialize and return the newly created cashback objects
+            return Response(data=CashBackSerializer(cashback_objs, many=True).data)
+
+        except Exception as e:
+            # General exception catch, logging the exception could be added here
+            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     def create_cashbacks_and_categories(self, cashbacks_data, bank_card_type_id):
         cashbacks = cashbacks_data.get('cashbacks', [])
