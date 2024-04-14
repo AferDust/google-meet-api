@@ -14,7 +14,7 @@ class BankCardTypeSerializer(serializers.ModelSerializer):
 class BankCardTypeParsingListSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankCardType
-        exclude = ['bank']
+        fields = "__all__"
 
 
 class BankCardTypeListSerializer(serializers.ModelSerializer):
