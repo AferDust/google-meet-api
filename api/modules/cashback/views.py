@@ -1,7 +1,9 @@
 from django.db.models import Q
 from django.core.cache import cache
 
-from rest_framework import views, status, permissions
+from rest_framework import views, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -76,36 +78,38 @@ class CashbackCreateAPIView(views.APIView):
         return cashback_objs
 
 
-class CategoryCashbackAPIView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, category_id=None):
-        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
-            .select_related('bank_card_type', 'bank_card_type__bank') \
-            .order_by('-percent')
-        user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
-
-        user_cashbacks = []
-        other_cashbacks = []
-
-        for cashback in cashbacks:
-            if cashback.bank_card_type_id in user_card_type_ids:
-                user_cashbacks.append(cashback)
-            else:
-                other_cashbacks.append(cashback)
-
-        user_cashbacks_data = CashbackUserSerializer(user_cashbacks, many=True, context={'request': self.request}).data
-        other_cashbacks_data = CashbackSerializer(other_cashbacks, many=True).data
-
-        return Response({
-            'user_cashbacks': user_cashbacks_data,
-            'other_cashbacks': other_cashbacks_data
-        }, status=status.HTTP_200_OK)
+# class CategoryCashbackAPIView(views.APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def get(self, request, category_id=None):
+#         cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
+#             .select_related('bank_card_type', 'bank_card_type__bank') \
+#             .order_by('-percent')
+#         user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
+#
+#         print(user_card_type_ids)
+#
+#         user_cashbacks = []
+#         other_cashbacks = []
+#
+#         for cashback in cashbacks:
+#             if cashback.bank_card_type_id in user_card_type_ids:
+#                 user_cashbacks.append(cashback)
+#             else:
+#                 other_cashbacks.append(cashback)
+#
+#         user_cashbacks_data = CashbackUserSerializer(user_cashbacks, many=True, context={'request': self.request}).data
+#         other_cashbacks_data = CashbackSerializer(other_cashbacks, many=True).data
+#
+#         return Response({
+#             'user_cashbacks': user_cashbacks_data,
+#             'other_cashbacks': other_cashbacks_data
+#         }, status=status.HTTP_200_OK)
 
 
 class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
     serializer_class = BankCardTypeWithCashbackListSerializer
-    filter_backends = [SearchFilter, OrderingFilter]
+    filter_backends = [SearchFilter]
     ordering_fields = ['percent']
     search_fields = ['bank_card_type__name', 'bank_card_type__bank__name']
 
@@ -117,10 +121,11 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
             'has_card_payment': self.request.query_params.get("has_card_payment", None),
             'min_percent': self.request.query_params.get("min_percent"),
             'max_percent': self.request.query_params.get("max_percent"),
+            'ordering': self.request.query_params.get('ordering')
         }
 
         if not cashback:
-            cashback = Cashback.objects.select_related('category', 'bank_card_type').all()
+            cashback = Cashback.objects.select_related('category', 'bank_card_type').order_by('-percent')
             cache.set('cashbacks', cashback, 300)
 
         queryset = cashback
@@ -141,6 +146,9 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
         if filter_params['max_percent']:
             filters &= Q(percent__lte=float(filter_params['max_percent']))
 
+        if filter_params['ordering']:
+            queryset = queryset.order_by(filter_params['ordering'])
+
         return queryset.filter(filters)
 
     def get_serializer_class(self):
@@ -148,3 +156,25 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
             return BankCardTypeWithCashbackCoverSerializer
 
         return super().get_serializer_class()
+
+    @action(detail=False, methods=['get'], url_path="get_user_cashbacks", permission_classes=[IsAuthenticated])
+    def get_user_cashbacks(self, request):
+        queryset = self.get_queryset()
+        user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
+
+        user_cashback = []
+        other_cashback = []
+
+        for cashback in queryset:
+            if cashback.bank_card_type_id in user_card_type_ids:
+                user_cashback.append(cashback)
+            else:
+                other_cashback.append(cashback)
+
+        user_cashback_data = CashbackUserSerializer(user_cashback, many=True, context={'request': self.request}).data
+        other_cashback_data = CashbackSerializer(other_cashback, many=True).data
+
+        return Response({
+            'user_cashbacks': user_cashback_data,
+            'other_cashbacks': other_cashback_data
+        }, status=status.HTTP_200_OK)
