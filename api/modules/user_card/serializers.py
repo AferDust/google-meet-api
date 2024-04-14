@@ -11,7 +11,7 @@ class UserCoverSerializer(serializers.ModelSerializer):
 
 
 class CardSerializer(serializers.ModelSerializer):
-    bank_name = serializers.CharField(source='card_type.bank.name')
+    bank_name = serializers.CharField(source='card_type.bank.name', required=False)
     card_type_name = serializers.SerializerMethodField(read_only=True)
     name = serializers.SerializerMethodField(read_only=True)
 
