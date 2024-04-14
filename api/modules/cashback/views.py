@@ -18,23 +18,32 @@ class CashbackCreateAPIView(views.APIView):
     def post(self, request):
         try:
             # Retrieve data from request
+            print("1")
             content = request.data.get("content")
             bank_card_type_id = request.data.get("bank_card_type_id")
+            print("2")
 
             # Validate necessary inputs
             if not content or not bank_card_type_id:
                 return Response({"error": "Missing required 'content' or 'bank_card_type_id'."},
                                 status=status.HTTP_400_BAD_REQUEST)
+            print("3")
+
 
             # Get all categories and serialize them
             categories = Category.objects.all()
             category_serializer = CategorySerializer(categories, many=True)
+            print("4")
+
 
             # Process cashback data
             cashback_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
+            print("5")
 
             # Create cashback and category objects
             cashback_objs = self.create_cashbacks_and_categories(cashback_data, bank_card_type_id)
+            print("6")
+
 
             # Serialize and return the newly created cashback objects
             return Response(data=CashBackSerializer(cashback_objs, many=True).data)
