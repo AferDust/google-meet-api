@@ -53,12 +53,12 @@ class Category(models.Model):
 
 
 class Cashback(models.Model):
-    bank_card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE)
+    bank_card_type = models.ForeignKey(BankCardType, on_delete=models.CASCADE, db_index=True)
     expired_date = models.DateField(null=True, blank=True)
-    percent = models.FloatField()
-    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
-    has_qr_payment = models.BooleanField(default=True)
-    has_card_payment = models.BooleanField(default=True)
+    percent = models.FloatField(db_index=True)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL, db_index=True)
+    has_qr_payment = models.BooleanField(default=True, db_index=True)
+    has_card_payment = models.BooleanField(default=True, db_index=True)
 
     def is_expired(self):
         return self.expired_date < timezone.now().date()
