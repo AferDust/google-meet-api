@@ -1,4 +1,6 @@
 from django.db.models import Q
+from django.core.cache import cache
+
 from rest_framework import views, status, permissions
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -8,7 +10,6 @@ from api.models import Category, Cashback, Card
 from api.modules.cashback.serializers import CashbackSerializer, CashbackUserSerializer
 from api.modules.cashback.serializers import CashBackSerializer, BankCardTypeWithCashbackCoverSerializer, \
     BankCardTypeWithCashbackListSerializer
-
 from api.modules.category.serializers import CategorySerializer
 from api.modules.services.gpt import get_structured_cashbacks_from_gpt_api
 
@@ -84,7 +85,7 @@ class CashbackCreateAPIView(views.APIView):
         return cashback_objs
 
 
-class CategoryCashbacksAPIView(views.APIView):
+class CategoryCashbackAPIView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, category_id=None):
@@ -118,25 +119,31 @@ class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
     search_fields = ['bank_card_type__name', 'bank_card_type__bank__name']
 
     def get_queryset(self):
+        cashback = cache.get('cashbacks')
         filter_params = {
             'categories': self.request.query_params.getlist("category"),
-            'has_qr_payment': self.request.query_params.get("has_qr_payment", 'true').lower() == 'true',
-            'has_card_payment': self.request.query_params.get("has_card_payment", 'true').lower() == 'true',
+            'has_qr_payment': self.request.query_params.get("has_qr_payment", None),
+            'has_card_payment': self.request.query_params.get("has_card_payment", None),
             'min_percent': self.request.query_params.get("min_percent"),
             'max_percent': self.request.query_params.get("max_percent"),
         }
 
-        queryset = Cashback.objects.all()
+        if not cashback:
+            cashback = Cashback.objects.select_related('category', 'bank_card_type').all()
+            cache.set('cashbacks', cashback, 300)
+
+        queryset = cashback
         filters = Q()
 
-        print(filter_params['has_card_payment'])
-        print(filter_params['has_qr_payment'])
-
-        filters &= Q(has_qr_payment=filter_params['has_qr_payment'])
-        filters &= Q(has_card_payment=filter_params['has_card_payment'])
+        if filter_params['has_qr_payment']:
+            has_qr_payment = filter_params['has_qr_payment'].lower() == 'true'
+            filters &= Q(has_qr_payment=has_qr_payment)
+        if filter_params['has_card_payment']:
+            has_card_payment = filter_params['has_card_payment'].lower() == 'true'
+            filters &= Q(has_card_payment=has_card_payment)
 
         if filter_params['categories']:
-            filters |= Q(category__id__in=filter_params['categories'])
+            filters |= Q(category__id__in=filter_params['categories']) | Q(category__id=177)
 
         if filter_params['min_percent']:
             filters &= Q(percent__gte=float(filter_params['min_percent']))
