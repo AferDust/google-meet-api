@@ -2,9 +2,13 @@ from django.db.models import Q
 from rest_framework import views, status, permissions
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 from api.models import Category, Cashback, Card
-from api.modules.cashback.serializers import CashBackSerializer, CashbackSerializer, CashbackUserSerializer
+from api.modules.cashback.serializers import CashbackSerializer, CashbackUserSerializer
+from api.modules.cashback.serializers import CashBackSerializer, BankCardTypeWithCashbackCoverSerializer, \
+    BankCardTypeWithCashbackListSerializer
+
 from api.modules.category.serializers import CategorySerializer
 from api.modules.services.gpt import get_structured_cashbacks_from_gpt_api
 
@@ -76,8 +80,7 @@ class CategoryCashbacksAPIView(views.APIView):
 
     def get(self, request, category_id=None):
         cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)).select_related('bank_card_type',
-                                                                                    'bank_card_type__bank')
-
+                                                                                               'bank_card_type__bank')
         user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
 
         user_cashbacks = []
@@ -96,3 +99,44 @@ class CategoryCashbacksAPIView(views.APIView):
             'user_cashbacks': user_cashbacks_data,
             'other_cashbacks': other_cashbacks_data
         }, status=status.HTTP_200_OK)
+
+
+class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
+    serializer_class = BankCardTypeWithCashbackListSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    ordering_fields = ['percent']
+    search_fields = ['bank_card_type__name', 'bank_card_type__bank__name']
+
+    def get_queryset(self):
+        filter_params = {
+            'categories': self.request.query_params.getlist("category"),
+            'has_qr_payment': self.request.query_params.get("has_qr_payment", 'true').lower() == 'true',
+            'has_card_payment': self.request.query_params.get("has_card_payment", 'true').lower() == 'true',
+            'min_percent': self.request.query_params.get("min_percent"),
+            'max_percent': self.request.query_params.get("max_percent"),
+        }
+
+        queryset = Cashback.objects.all()
+        filters = Q()
+
+        print(filter_params['has_card_payment'])
+        print(filter_params['has_qr_payment'])
+
+        filters &= Q(has_qr_payment=filter_params['has_qr_payment'])
+        filters &= Q(has_card_payment=filter_params['has_card_payment'])
+
+        if filter_params['categories']:
+            filters |= Q(category__id__in=filter_params['categories'])
+
+        if filter_params['min_percent']:
+            filters &= Q(percent__gte=float(filter_params['min_percent']))
+        if filter_params['max_percent']:
+            filters &= Q(percent__lte=float(filter_params['max_percent']))
+
+        return queryset.filter(filters)
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return BankCardTypeWithCashbackCoverSerializer
+
+        return super().get_serializer_class()
