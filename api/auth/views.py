@@ -21,7 +21,7 @@ class GoogleOAuth2AuthorizationAPIView(APIView):
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'https://www.googleapis.com/auth/userinfo.email'
             ],
-            redirect_uri="http://127.0.0.1:8000/api/auth/callback"
+            redirect_uri=settings.REDIRECT_URIS_1
         )
 
         authorization_url, state = flow.authorization_url(
@@ -46,7 +46,7 @@ class GoogleOAuth2CallbackAPIView(APIView):
                 'https://www.googleapis.com/auth/userinfo.email'
             ],
             state=state,
-            redirect_uri="http://127.0.0.1:8000/api/auth/callback"
+            redirect_uri=settings.REDIRECT_URIS_1
         )
 
         flow.fetch_token(authorization_response=request.build_absolute_uri())
@@ -71,6 +71,7 @@ class GetUserGoogleTokemAPIView(APIView):
         return Response({"message": "You have access!",
                          "profile": request.user_info
                          })
+
 
 class RegistrationCreateAPIView(generics.CreateAPIView):
     queryset = User.objects.all()

@@ -145,19 +145,21 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+REDIRECT_URIS_1 = os.getenv('REDIRECT_URIS_1')
 GOOGLE_OAUTH2_CLIENT_CONFIG = {
     "web": {
-        "client_id": "722494925006-sel1897bv3nepnb6k699cscevhcg39gr.apps.googleusercontent.com",
-        "project_id": "carbon-zone-417117",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_secret": "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",
+        "client_id": os.getenv('CLIENT_ID'),
+        "project_id": os.getenv('carbon-zone-417117'),
+        "auth_uri": os.getenv('AUTH_URI'),
+        "token_uri": os.getenv('TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.getenv('AUTH_PROVIDER'),
+        "client_secret": os.getenv('CLIENT_SECRET'),
         "redirect_uris": [
-            "http://127.0.0.1:8000/api/auth/callback"
+            REDIRECT_URIS_1
         ],
         "javascript_origins": [
-            "http://127.0.0.1:8000"
+            os.getenv('JAVASCRIPT_ORIGINS_1')
         ]
     }
 }
