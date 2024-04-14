@@ -29,30 +29,30 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Bank)
 class BankAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['id', 'name']
     search_fields = ['name']
     list_filter = ['name']
 
 @admin.register(BankCardType)
 class BankCardTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'bank', 'url']
+    list_display = ['id', 'name', 'bank', 'url']
     list_filter = ['bank']
     search_fields = ['name', 'bank__name']
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['category']
+    list_display = ['id', 'category']
     search_fields = ['category']
 
 @admin.register(Cashback)
 class CashbackAdmin(admin.ModelAdmin):
-    list_display = ['bank_card_type', 'percent', 'category', 'expired_date', 'has_qr_payment', 'has_card_payment']
+    list_display = ['id', 'bank_card_type', 'percent', 'category', 'expired_date', 'has_qr_payment', 'has_card_payment']
     sortable_by = 'percent'
     list_filter = ['bank_card_type', 'category', 'expired_date']
     search_fields = ['bank_card_type__name', 'category__category']
 
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
-    list_display = ['number', 'user', 'card_type', 'expired_date']
+    list_display = ['id', 'number', 'user', 'card_type', 'expired_date']
     search_fields = ['number', 'user__username', 'card_type__name']
     list_filter = ['card_type', 'user']

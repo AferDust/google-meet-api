@@ -1,10 +1,10 @@
 from django.db.models import Q
-from rest_framework import views, status
+from rest_framework import views, status, permissions
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from api.models import Category, Cashback
-from api.modules.cashback.serializers import CashBackSerializer
+from api.models import Category, Cashback, Card
+from api.modules.cashback.serializers import CashBackSerializer, CashbackSerializer, CashbackUserSerializer
 from api.modules.category.serializers import CategorySerializer
 from api.modules.services.gpt import get_structured_cashbacks_from_gpt_api
 
@@ -19,7 +19,8 @@ class CashbackCreateAPIView(views.APIView):
 
             # Validate necessary inputs
             if not content or not bank_card_type_id:
-                return Response({"error": "Missing required 'content' or 'bank_card_type_id'."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Missing required 'content' or 'bank_card_type_id'."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Get all categories and serialize them
             categories = Category.objects.all()
@@ -36,8 +37,8 @@ class CashbackCreateAPIView(views.APIView):
 
         except Exception as e:
             # General exception catch, logging the exception could be added here
-            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response({"error": f"An unexpected error occurred: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create_cashbacks_and_categories(self, cashbacks_data, bank_card_type_id):
         cashbacks = cashbacks_data.get('cashbacks', [])
@@ -70,11 +71,28 @@ class CashbackCreateAPIView(views.APIView):
         return cashback_objs
 
 
+class CategoryCashbacksAPIView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
+    def get(self, request, category_id=None):
+        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)).select_related('bank_card_type',
+                                                                                    'bank_card_type__bank')
 
+        user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
 
+        user_cashbacks = []
+        other_cashbacks = []
 
+        for cashback in cashbacks:
+            if cashback.bank_card_type_id in user_card_type_ids:
+                user_cashbacks.append(cashback)
+            else:
+                other_cashbacks.append(cashback)
 
+        user_cashbacks_data = CashbackUserSerializer(user_cashbacks, many=True, context={'request': self.request}).data
+        other_cashbacks_data = CashbackSerializer(other_cashbacks, many=True).data
 
-
-
+        return Response({
+            'user_cashbacks': user_cashbacks_data,
+            'other_cashbacks': other_cashbacks_data
+        }, status=status.HTTP_200_OK)
