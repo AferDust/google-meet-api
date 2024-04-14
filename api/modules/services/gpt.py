@@ -56,6 +56,7 @@ def get_structured_program_from_gpt_api(content):
 
 
 def get_structured_cashbacks_from_gpt_api(content, categories):
+    # return 23
     url = "https://us-central1-carbon-zone-417117.cloudfunctions.net/gpt-api"
 
     headers = {

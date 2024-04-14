@@ -21,23 +21,32 @@ class CashbackCreateAPIView(views.APIView):
     def post(self, request):
         try:
             # Retrieve data from request
+            print("1")
             content = request.data.get("content")
             bank_card_type_id = request.data.get("bank_card_type_id")
+            print("2")
 
             # Validate necessary inputs
             if not content or not bank_card_type_id:
                 return Response({"error": "Missing required 'content' or 'bank_card_type_id'."},
                                 status=status.HTTP_400_BAD_REQUEST)
+            print("3")
+
 
             # Get all categories and serialize them
             categories = Category.objects.all()
             category_serializer = CategorySerializer(categories, many=True)
+            print("4")
+
 
             # Process cashback data
             cashback_data = get_structured_cashbacks_from_gpt_api(content, category_serializer.data)
+            print("5")
 
             # Create cashback and category objects
             cashback_objs = self.create_cashbacks_and_categories(cashback_data, bank_card_type_id)
+            print("6")
+
 
             # Serialize and return the newly created cashback objects
             return Response(data=CashBackSerializer(cashback_objs, many=True).data)
@@ -78,33 +87,33 @@ class CashbackCreateAPIView(views.APIView):
         return cashback_objs
 
 
-# class CategoryCashbackAPIView(views.APIView):
-#     permission_classes = [IsAuthenticated]
-#
-#     def get(self, request, category_id=None):
-#         cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
-#             .select_related('bank_card_type', 'bank_card_type__bank') \
-#             .order_by('-percent')
-#         user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
-#
-#         print(user_card_type_ids)
-#
-#         user_cashbacks = []
-#         other_cashbacks = []
-#
-#         for cashback in cashbacks:
-#             if cashback.bank_card_type_id in user_card_type_ids:
-#                 user_cashbacks.append(cashback)
-#             else:
-#                 other_cashbacks.append(cashback)
-#
-#         user_cashbacks_data = CashbackUserSerializer(user_cashbacks, many=True, context={'request': self.request}).data
-#         other_cashbacks_data = CashbackSerializer(other_cashbacks, many=True).data
-#
-#         return Response({
-#             'user_cashbacks': user_cashbacks_data,
-#             'other_cashbacks': other_cashbacks_data
-#         }, status=status.HTTP_200_OK)
+class CategoryCashbackAPIView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, category_id=None):
+        cashbacks = Cashback.objects.filter(category_id__in=(177, category_id)) \
+            .select_related('bank_card_type', 'bank_card_type__bank') \
+            .order_by('-percent')
+        user_card_type_ids = Card.objects.filter(user=request.user).values_list('card_type_id', flat=True).distinct()
+
+        print(user_card_type_ids)
+
+        user_cashbacks = []
+        other_cashbacks = []
+
+        for cashback in cashbacks:
+            if cashback.bank_card_type_id in user_card_type_ids:
+                user_cashbacks.append(cashback)
+            else:
+                other_cashbacks.append(cashback)
+
+        user_cashbacks_data = CashbackUserSerializer(user_cashbacks, many=True, context={'request': self.request}).data
+        other_cashbacks_data = CashbackSerializer(other_cashbacks, many=True).data
+
+        return Response({
+            'user_cashbacks': user_cashbacks_data,
+            'other_cashbacks': other_cashbacks_data
+        }, status=status.HTTP_200_OK)
 
 
 class BankCardReadonlyModelViewSet(ReadOnlyModelViewSet):
