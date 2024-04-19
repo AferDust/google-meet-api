@@ -1,17 +1,18 @@
 FROM python:3.11-alpine
 
-# .env.prod variables
-
-# Set the working directory to /app
 WORKDIR /app
 
-# copy the requirements file used for dependencies
+ENV PROD=True
+#ENV DEBUG=False
+
 COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN pip install --trusted-host pypi.python.org -r requirements.txt && pip install gunicorn
 
-# Copy the rest of the working directory contents into the container at /app
 COPY . .
-# Run app.py when the container launches
-ENTRYPOINT ["python", "manage.py", "runserver", "--noreload"]
+
+RUN python manage.py collectstatic --noinput
+
+EXPOSE 8000
+
+ENTRYPOINT ["gunicorn", "-w", "3", "-b", ":8000", "config.wsgi:application"]
